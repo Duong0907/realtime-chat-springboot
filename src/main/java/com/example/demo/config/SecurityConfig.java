@@ -3,6 +3,7 @@ package com.example.demo.config;
 import com.example.demo.filter.JwtAuthenticationFilter;
 import com.example.demo.security.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +26,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Value("${JWT_SECRET_KEY}")
+    private String jwtSecretKey;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectPostProcessor<Object> objectPostProcessor) throws Exception {

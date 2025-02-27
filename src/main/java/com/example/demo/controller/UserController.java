@@ -25,12 +25,25 @@ public class UserController {
         return new ResponseEntity<>(response, response.getStatusCode());
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<Response> getCurrentUser() throws Exception {
+        Response response = userService.getCurrentUser();
+        return new ResponseEntity<>(response, response.getStatusCode());
+    }
+
     @PatchMapping("/{user_id}")
     public ResponseEntity<Response> updateUserById(@PathVariable("user_id") Long userId, @RequestBody UpdateUserDto updateUserDto) throws Exception {
         Response response = userService.updateUserById(userId, updateUserDto);
         return new ResponseEntity<>(response, response.getStatusCode());
     }
 
+    @PatchMapping("/profilePicture")
+    public ResponseEntity<Response> updateUserProfilePicture() {
+        Response response = userService.updateUserProfilePicture();
+        return new ResponseEntity<>(response, response.getStatusCode());
+    }
+
+    @DeleteMapping("/{user_id}")
     public ResponseEntity<Response> deleteUserById(@PathVariable("user_id") Long userId) throws Exception  {
         Response response = userService.deleteUserById(userId);
         return new ResponseEntity<>(response, response.getStatusCode());

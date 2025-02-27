@@ -36,4 +36,3 @@
   - Get conversation by id
   - Get all message by conversation id (paging by number of last message)
   - Get all members
-- 

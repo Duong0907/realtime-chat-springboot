@@ -27,13 +27,18 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
+    public Response register(RegisterRequest registerRequest) throws CustomException {
+        User foundUser  = userRepository.findByUsernameOrEmail(registerRequest.getUsername(), registerRequest.getEmail()).orElse(null);
+        if (foundUser != null) {
+            throw new CustomException(HttpStatus.BAD_REQUEST, "Username or Email already exists");
+        }
 
-    public Response register(RegisterRequest registerRequest) {
         User user = User.builder()
                 .username(registerRequest.getUsername())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .email(registerRequest.getEmail())
                 .role(Role.USER)    // Register for normal users
+                .isAvailable(true)
                 .build();
 
         User savedUser = this.userRepository.save(user);

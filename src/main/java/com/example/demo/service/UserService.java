@@ -6,8 +6,10 @@ import com.example.demo.dto.user.UserDto;
 import com.example.demo.entity.User;
 import com.example.demo.exception.CustomException;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -54,6 +56,29 @@ public class UserService {
                 .build();
     }
 
+    public Response getCurrentUser() throws CustomException {
+        Object rawPrinciple = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+        CustomUserDetails principle = (CustomUserDetails) rawPrinciple;
+        Long userId = principle.getUserId();
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            throw new CustomException(HttpStatus.BAD_REQUEST, "User not found");
+        }
+
+        UserDto userDto = new UserDto(user);
+
+        return Response
+                .builder()
+                .statusCode(HttpStatus.OK)
+                .message("Get current user successfully")
+                .data(userDto)
+                .build();
+    }
+
     public Response updateUserById(Long userId, UpdateUserDto updateUserDto) throws CustomException {
         User foundUser = userRepository.findById(userId).orElse(null);
 
@@ -88,6 +113,10 @@ public class UserService {
                 .message("Update user by id successfully")
                 .data(updatedUser)
                 .build();
+    }
+
+    public Response updateUserProfilePicture() {
+        return null;
     }
 
     public Response deleteUserById(Long userId) throws CustomException {

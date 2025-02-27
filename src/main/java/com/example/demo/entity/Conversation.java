@@ -5,19 +5,19 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-@Table(name = "images")
 @Entity
-public class Image {
+@Table(name = "conversations")
+public class Conversation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String publicId;
-
-    private String url;
+    private String name;
 
     @CreationTimestamp
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
@@ -27,11 +27,9 @@ public class Image {
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Instant updatedAt;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
+    @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Message> messages = new ArrayList<>();
 
-    @OneToOne
-    @JoinColumn(name = "message_id", referencedColumnName = "id")
-    private Message message;
+    @ManyToMany(mappedBy = "conversations", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    private Set<User> users = new HashSet<>();
 }

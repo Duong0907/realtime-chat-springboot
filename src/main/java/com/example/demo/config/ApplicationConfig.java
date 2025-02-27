@@ -27,7 +27,6 @@ public class ApplicationConfig {
     private String apiSecret;
     @Value("${CLOUDINARY_SECURE}")
     private String secure;
-
     @Bean
     public UserDetailsService userDetailsService() {
         return new CustomUserDetailsService(this.userRepository);
