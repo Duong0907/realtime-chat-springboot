@@ -1,24 +1,36 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.Response;
+import com.example.demo.dto.conversation.ConversationDto;
 import com.example.demo.dto.user.UpdateUserDto;
 import com.example.demo.dto.user.UserDto;
+import com.example.demo.entity.Conversation;
 import com.example.demo.entity.User;
 import com.example.demo.exception.CustomException;
+import com.example.demo.repository.ConversationRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.CustomUserDetails;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final ConversationRepository conversationRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public Response getUserById(Long userId) throws CustomException {
         User user = userRepository.findById(userId).orElse(null);
@@ -126,6 +138,68 @@ public class UserService {
                 .builder()
                 .statusCode(HttpStatus.OK)
                 .message("Delete user by id successfully")
+                .build();
+    }
+
+    // Find users without common conversations
+    public Response getAllNewSuggestedUsers() {
+        Object rawPrinciple = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+        CustomUserDetails principle = (CustomUserDetails) rawPrinciple;
+        Long userId = principle.getUserId();
+
+        String jpql = "SELECT u FROM User u " +
+                    "WHERE u.id NOT IN (" +
+                    "    SELECT u2.id " +
+                    "    FROM User u2 " +
+                    "    JOIN u2.conversations c " +
+                    "    WHERE c.id IN (" +
+                    "        SELECT c2.id " +
+                    "        FROM User u3 " +
+                    "        JOIN u3.conversations c2 " +
+                    "        WHERE u3.id = :userId" +
+                    "    )" +
+                    ")";
+
+        Query query = entityManager.createQuery(jpql, User.class);
+        query.setParameter("userId", userId);
+        List<User> users = query.getResultList();
+        List<UserDto> userDtos = users.stream().map(UserDto::new).collect(Collectors.toList());
+
+        return Response
+                .builder()
+                .statusCode(HttpStatus.OK)
+                .message("Get all new suggested users successfully")
+                .data(userDtos)
+                .build();
+    }
+
+    public Response getAllCurrentConversationOfUser() {
+        Object rawPrinciple = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+        CustomUserDetails principle = (CustomUserDetails) rawPrinciple;
+        Long userId = principle.getUserId();
+
+        User currentUser = userRepository.findById(userId).orElse(null);
+
+        if (currentUser == null) {
+            throw new CustomException(HttpStatus.BAD_REQUEST, "User not found");
+        }
+
+        Set<ConversationDto> conversations = currentUser
+                .getConversations()
+                .stream().map(ConversationDto::new)
+                .collect(Collectors.toSet());
+
+        return Response
+                .builder()
+                .statusCode(HttpStatus.OK)
+                .message("Get all current conversation of user successfully")
+                .data(new ArrayList<>(conversations))
                 .build();
     }
 }

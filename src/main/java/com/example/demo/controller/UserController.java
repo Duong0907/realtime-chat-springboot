@@ -48,4 +48,16 @@ public class UserController {
         Response response = userService.deleteUserById(userId);
         return new ResponseEntity<>(response, response.getStatusCode());
     }
+
+    @GetMapping("/suggestion")
+    public ResponseEntity<Response> getAllSuggestedChatUser() {
+        Response response = userService.getAllNewSuggestedUsers();
+        return new ResponseEntity<>(response, response.getStatusCode());
+    }
+
+    @GetMapping("/conversation-list")
+    public ResponseEntity<Response> getConversationList() {
+        Response response = userService.getAllCurrentConversationOfUser();
+        return new ResponseEntity<>(response, response.getStatusCode());
+    }
 }

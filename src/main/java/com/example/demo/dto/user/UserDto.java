@@ -23,6 +23,7 @@ public class UserDto {
     private Role role;
     private boolean isAvailable;
     private Instant lastOnline;
+    private String profilePicture;
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -34,6 +35,7 @@ public class UserDto {
         this.role = user.getRole();
         this.isAvailable = user.getIsAvailable();
         this.lastOnline = user.getLastOnline();
+        this.profilePicture = user.getProfilePicture() != null ? user.getProfilePicture().getUrl() : null;
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
     }

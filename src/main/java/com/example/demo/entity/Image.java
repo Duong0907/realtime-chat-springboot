@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -10,6 +11,7 @@ import java.util.Set;
 
 @Table(name = "images")
 @Entity
+@Getter
 public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
+@Getter
 @Table(name = "conversations")
 public class Conversation {
     @Id
