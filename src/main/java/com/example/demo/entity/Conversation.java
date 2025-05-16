@@ -32,6 +32,6 @@ public class Conversation {
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Message> messages = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "conversations", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "conversations", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     private Set<User> users = new HashSet<>();
 }

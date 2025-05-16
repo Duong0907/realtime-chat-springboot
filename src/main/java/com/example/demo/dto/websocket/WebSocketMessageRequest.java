@@ -11,10 +11,3 @@ public class WebSocketMessageRequest {
     WebSocketMessage message;
 }
 
-@Getter
-@Setter
-class WebSocketMessage {
-    private String message;
-    private String senderId;
-    private String conversationId;
-}

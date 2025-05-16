@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -192,7 +193,9 @@ public class UserService {
 
         Set<ConversationDto> conversations = currentUser
                 .getConversations()
-                .stream().map(ConversationDto::new)
+                .stream()
+                .sorted(Comparator.comparing(Conversation::getUpdatedAt).reversed())
+                .map(ConversationDto::new)
                 .collect(Collectors.toSet());
 
         return Response

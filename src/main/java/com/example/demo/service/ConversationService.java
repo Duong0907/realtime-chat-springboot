@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.Response;
+import com.example.demo.dto.conversation.ConversationDto;
 import com.example.demo.dto.conversation.LastReadDto;
 import com.example.demo.entity.Conversation;
 import com.example.demo.entity.LastRead;
@@ -11,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import javax.management.Query;
 import java.util.List;
 
 @Service
@@ -34,6 +34,21 @@ public class ConversationService {
                 .statusCode(HttpStatus.OK)
                 .message("Get last read status successfully")
                 .data(lastReadDtos)
+                .build();
+    }
+
+    public Response getConversationById(Long conversationId) {
+        Conversation conversation = conversationRepository.findById(conversationId).orElse(null);
+        if (conversation == null) {
+            throw new CustomException(HttpStatus.BAD_REQUEST, "Conversation not found");
+        }
+
+        ConversationDto conversationDto = new ConversationDto(conversation);
+        return Response
+                .builder()
+                .statusCode(HttpStatus.OK)
+                .message("Get conversation by id successfully")
+                .data(conversationDto)
                 .build();
     }
 }

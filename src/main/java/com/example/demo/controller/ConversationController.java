@@ -12,12 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/conversations")
-public class ConversationController {
+public class    ConversationController {
     private final ConversationService conversationService;
 
     @GetMapping("/lastreads/{conversation_id}")
     public ResponseEntity<Response> getLastReadStatusOfConversation(@PathVariable("conversation_id") Long conversationId) {
         Response response = conversationService.getLastReadStatusOfConversation(conversationId);
+        return new ResponseEntity<>(response, response.getStatusCode());
+    }
+
+    @GetMapping("/{conversation_id}")
+    public ResponseEntity<Response> getConversationById(@PathVariable("conversation_id") Long conversationId) {
+        Response response = conversationService.getConversationById(conversationId);
         return new ResponseEntity<>(response, response.getStatusCode());
     }
 }

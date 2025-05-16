@@ -11,9 +11,12 @@ import org.springframework.web.socket.config.annotation.*;
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
     private final ChatWebsocketHandler myWebSocketHandler;
+    private final WebSocketInterceptor myInterceptor;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(myWebSocketHandler, "/websocket").setAllowedOrigins("*");
+        registry.addHandler(myWebSocketHandler, "/websocket")
+                .addInterceptors(myInterceptor)
+                .setAllowedOrigins("*");
     }
 }

@@ -3,11 +3,13 @@ package com.example.demo.controller;
 import com.example.demo.dto.websocket.ResponseType;
 import com.example.demo.dto.websocket.WebSocketMessageRequest;
 import com.example.demo.dto.websocket.WebSocketResponse;
+import com.example.demo.entity.User;
 import com.example.demo.service.WebSocketService;
 import com.example.demo.utils.JSONUtil;
 import com.example.demo.utils.WebSocketUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.web.client.RestClientBuilderConfigurer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -24,9 +26,18 @@ public class ChatWebsocketHandler extends TextWebSocketHandler {
     private final JSONUtil jsonUtil;
     private final WebSocketUtil webSocketUtil;
     private final WebSocketService webSocketService;
+    private final RestClientBuilderConfigurer restClientBuilderConfigurer;
 
     @Override
     public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
+        for (WebSocketSession webSocketSession : sessions) {
+            User user = (User) webSocketSession.getAttributes().get("user");
+            User sessionUser = (User) session.getAttributes().get("user");
+            if (webSocketSession.isOpen() && user.getId().equals(sessionUser.getId())) {
+                return;
+            }
+        }
+
         sessions.add(session);
 
         WebSocketResponse response = webSocketService.connect(session);
@@ -36,7 +47,7 @@ public class ChatWebsocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(@NonNull WebSocketSession session, TextMessage message) throws Exception {
+    protected void handleTextMessage(@NonNull WebSocketSession session, @NonNull TextMessage message) throws Exception {
         WebSocketMessageRequest request = null;
         try {
             String stringMessage = message.getPayload();
@@ -44,23 +55,29 @@ public class ChatWebsocketHandler extends TextWebSocketHandler {
         } catch (Exception e) {
             WebSocketResponse response = WebSocketResponse
                     .builder()
-                            .type(ResponseType.ERROR)
-                                    .data("Invalid message format")
-                                            .build();
+                    .type(ResponseType.ERROR)
+                    .data("Invalid message format")
+                    .build();
 
             String jsonResponse = jsonUtil.objectToJSON(response);
             webSocketUtil.broadcast(sessions, jsonResponse);
             return;
         }
 
-        WebSocketResponse response = webSocketService.sendMessage(session, request);
+        WebSocketResponse response = webSocketService.createMessage(session, request);
+
         String jsonResponse = jsonUtil.objectToJSON(response);
 
-        webSocketUtil.broadcast(sessions, jsonResponse);
+        if (response.getType() == ResponseType.MESSAGE) {
+            Long conversationId = request.getMessage().getConversationId();
+            webSocketUtil.broadcastToConversation(sessions, jsonResponse, conversationId);
+        } else {
+            webSocketUtil.sendMessageToUser(session, jsonResponse);
+        }
     }
 
     @Override
-    public void afterConnectionClosed(@NonNull WebSocketSession session,@NonNull CloseStatus status) throws Exception {
+    public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) throws Exception {
         sessions.remove(session);
 
         WebSocketResponse response = webSocketService.disconnect(session);

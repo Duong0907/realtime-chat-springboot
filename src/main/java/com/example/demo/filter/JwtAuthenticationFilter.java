@@ -83,7 +83,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         // Declare no-need-checking-jwt routes here
-        return request.getServletPath().startsWith("/auth");
+        return request.getServletPath().startsWith("/auth") || request.getServletPath().startsWith("/websocket");
     }
 
     private void handleJwtException(HttpServletResponse response, HttpStatus status, String message) throws IOException {
